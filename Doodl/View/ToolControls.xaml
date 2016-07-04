@@ -1,0 +1,195 @@
+﻿<UserControl x:Class="Doodl.View.ToolControls"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:ink="clr-namespace:System.Windows.Ink;assembly=PresentationCore"
+             xmlns:v="clr-namespace:Doodl.View"
+             xmlns:vm="clr-namespace:Doodl.ViewModel"
+             mc:Ignorable="d" 
+             d:DesignHeight="600" d:DesignWidth="300"
+             MinWidth="224">
+    <UserControl.Resources>
+        <Style x:Key="SelectionList" TargetType="ListBox">
+            <Setter Property="Margin" Value="8 0 8 0" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListBox">
+                        <ItemsPresenter />
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="ToolSelectionList" TargetType="ListBox" BasedOn="{StaticResource SelectionList}">
+            <Setter Property="ItemsPanel">
+                <Setter.Value>
+                    <ItemsPanelTemplate>
+                        <UniformGrid Columns="8" />
+                    </ItemsPanelTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="ColorSelectionList" TargetType="ListBox" BasedOn="{StaticResource SelectionList}">
+            <Setter Property="ItemsPanel">
+                <Setter.Value>
+                    <ItemsPanelTemplate>
+                        <UniformGrid Columns="8" />
+                    </ItemsPanelTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="ToolSelectionListItem" TargetType="ListBoxItem">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListBoxItem">
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="ListBoxItem.IsSelected" Value="True">
+                                <Setter TargetName="SelectionBorder" Property="Border.BorderBrush" Value="LightSteelBlue" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Border Name="SelectionBorder"
+                                    Grid.Row="1"
+                                    Grid.Column="1"
+                                    BorderThickness="2"
+                                    BorderBrush="White">
+                                <ContentPresenter />
+                            </Border>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="InkListItem" TargetType="ListBoxItem" BasedOn="{StaticResource ToolSelectionListItem}">
+            <Setter Property="Foreground">
+                <Setter.Value>
+                    <SolidColorBrush Color="{Binding DataContext.InkColor, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListBox}}" />
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="HighlighterListItem" TargetType="ListBoxItem" BasedOn="{StaticResource ToolSelectionListItem}">
+            <Setter Property="Foreground">
+                <Setter.Value>
+                    <SolidColorBrush Color="{Binding DataContext.HighlighterColor, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListBox}}" />
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="EraserListItem" TargetType="ListBoxItem" BasedOn="{StaticResource ToolSelectionListItem}">
+            <Setter Property="Foreground" Value="Transparent" />
+        </Style>
+        <Style x:Key="ColorListItem" TargetType="ListBoxItem">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListBoxItem">
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="ListBoxItem.IsSelected" Value="True">
+                                <Setter TargetName="SelectionBorder" Property="Border.BorderBrush" Value="LightSteelBlue" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Border Name="SelectionBorder"
+                                    Grid.Row="1"
+                                    Grid.Column="1"                                    
+                                    BorderThickness="2">
+                                <Border.BorderBrush>
+                                    <SolidColorBrush Color="{Binding}" />
+                                </Border.BorderBrush>
+                                <Grid Width="22" Height="22">
+                                    <Grid.Background>
+                                        <SolidColorBrush Color="{Binding}" />
+                                    </Grid.Background>
+                                </Grid>
+                            </Border>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+    <StackPanel Background="SlateGray">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <ToggleButton Grid.Column="1"
+                            Background="SlateGray"
+                            Content="{StaticResource appbar.draw.marker}"
+                            Style="{StaticResource ToolSelector}"
+                            IsChecked="{Binding Path=SelectedTool, Converter={StaticResource EnumSelectedConverter}, ConverterParameter=Ink}" />
+            <ToggleButton Grid.Column="2"
+                            Background="SlateGray"
+                            Content="{StaticResource appbar.draw.paintbrush}"
+                            Style="{StaticResource ToolSelector}"
+                            IsChecked="{Binding Path=SelectedTool, Converter={StaticResource EnumSelectedConverter}, ConverterParameter=Highlighter}" />
+            <ToggleButton Grid.Column="3"
+                            Background="SlateGray"
+                            Content="{StaticResource appbar.medical.pill}"
+                            Style="{StaticResource ToolSelector}"
+                            IsChecked="{Binding Path=SelectedTool, Converter={StaticResource EnumSelectedConverter}, ConverterParameter=Eraser}" />
+            <ToggleButton Grid.Column="4"
+                            Background="SlateGray"
+                            Content="{StaticResource appbar.slice}"
+                            Style="{StaticResource ToolSelector}"
+                            IsChecked="{Binding Path=SelectedTool, Converter={StaticResource EnumSelectedConverter}, ConverterParameter=StrokeEraser}" />
+        </Grid>
+        <StackPanel Visibility="{Binding Path=SelectedTool, Converter={StaticResource EnumSelectedVisibilityConverter}, ConverterParameter=Ink}">
+            <Label Foreground="White" FontFamily="Segoe UI" FontSize="16" Margin="2 0 2 0">Ink Pens</Label>
+            <ListBox ItemsSource="{Binding InkPenTips}"
+                     SelectedItem="{Binding InkTip}"
+                     Style="{StaticResource ToolSelectionList}"
+                     ItemContainerStyle="{StaticResource InkListItem}" />
+            <Label Foreground="White" FontFamily="Segoe UI" FontSize="16" Margin="2 0 2 0">Color</Label>
+            <ListBox ItemsSource="{Binding InkColors}"
+                     SelectedItem="{Binding InkColor}"
+                     Style="{StaticResource ColorSelectionList}"
+                     ItemContainerStyle="{StaticResource ColorListItem}" />
+        </StackPanel>
+        <StackPanel Visibility="{Binding Path=SelectedTool, Converter={StaticResource EnumSelectedVisibilityConverter}, ConverterParameter=Highlighter}">
+            <Label Foreground="White" FontFamily="Segoe UI" FontSize="16" Margin="2 0 2 0">Highlighter Pens</Label>
+            <ListBox ItemsSource="{Binding HighlighterPenTips}"
+                     SelectedItem="{Binding HighlighterTip}"
+                     Style="{StaticResource ToolSelectionList}"
+                     ItemContainerStyle="{StaticResource HighlighterListItem}" />
+            <Label Foreground="White" FontFamily="Segoe UI" FontSize="16" Margin="2 0 2 0">Color</Label>
+            <ListBox ItemsSource="{Binding HighlighterColors}"
+                     SelectedItem="{Binding HighlighterColor}"
+                     Style="{StaticResource ColorSelectionList}"
+                     ItemContainerStyle="{StaticResource ColorListItem}" />
+        </StackPanel>
+        <StackPanel Visibility="{Binding Path=SelectedTool, Converter={StaticResource EnumSelectedVisibilityConverter}, ConverterParameter=Eraser}">
+            <Label Foreground="White" FontFamily="Segoe UI" FontSize="16" Margin="2 0 2 0">Eraser Shapes</Label>
+            <ListBox ItemsSource="{Binding EraserPenTips}"
+                     SelectedItem="{Binding EraserTip}"
+                     Style="{StaticResource ToolSelectionList}"
+                     ItemContainerStyle="{StaticResource EraserListItem}" />
+        </StackPanel>
+    </StackPanel>
+    <x:Code>
+        <![CDATA[public ToolControls() { this.InitializeComponent(); }]]>
+    </x:Code>
+</UserControl>

@@ -1,0 +1,289 @@
+﻿<Window x:Class="Doodl.View.DoodlWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+        xmlns:v="clr-namespace:Doodl.View"
+        xmlns:vm="clr-namespace:Doodl.ViewModel"
+        xmlns:vh="clr-namespace:Doodl.View.Helpers"
+        xmlns:swi="clr-namespace:System.Windows.Input;assembly=PresentationCore"
+        mc:Ignorable="d"
+        SnapsToDevicePixels="True"
+        Title="Doodl" Height="548" Width="724">
+    <Window.InputBindings>
+        <KeyBinding Modifiers="Ctrl" Key="Z" Command="{Binding UndoCommand}" />
+        <KeyBinding Modifiers="Ctrl" Key="Y" Command="{Binding RedoCommand}" />
+    </Window.InputBindings>
+    <Window.Resources>
+        <Style x:Key="DismissDialog" TargetType="Button">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="#80000000">
+                            <ContentPresenter />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+    <Grid>
+        <DockPanel>
+            <v:ToolControls DataContext="{Binding}" DockPanel.Dock="Left" />
+            <Grid Background="SlateGray" DockPanel.Dock="Top">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" Orientation="Horizontal">
+                    <Button Command="{Binding UndoCommand}"
+                            Content="{StaticResource appbar.undo}"
+                            Style="{StaticResource MenuButton}" />
+                    <Button Command="{Binding RedoCommand}"
+                            Content="{StaticResource appbar.redo}"
+                            Style="{StaticResource MenuButton}" />
+                </StackPanel>
+                <StackPanel Grid.Column="2" Orientation="Horizontal">
+                    <Button Command="{Binding NewCommand}"
+                            Content="{StaticResource appbar.page.new}"
+                            Style="{StaticResource MenuButton}" />
+                    <Button Command="{Binding OpenCommand}"
+                            Content="{StaticResource appbar.folder.open}"
+                            Style="{StaticResource MenuButton}" />
+                    <Button Command="{Binding SaveCommand}"
+                            Content="{StaticResource appbar.save}"
+                            Style="{StaticResource MenuButton}" />
+                    <Button Command="{Binding SaveAsImageCommand}"
+                            CommandParameter="{x:Reference InkCanvas}"
+                            Content="{StaticResource appbar.image}"
+                            Style="{StaticResource MenuButton}" />
+                    <Rectangle Width="16" />
+                    <Button Command="{Binding StartUploadCommand}"
+                            Content="{StaticResource appbar.cloud.upload}"
+                            Style="{StaticResource MenuButton}" />
+                </StackPanel>
+            </Grid>
+            <InkCanvas x:Name="InkCanvas"
+                       Grid.Column="1"
+                       Strokes="{Binding Strokes}"
+                       vh:InkCanvasHelper.PenDetails="{Binding}">
+                <InkCanvas.DefaultDrawingAttributes>
+                    <MultiBinding Converter="{StaticResource DrawingAttributesMultiValueConverter}">
+                        <Binding Path="SelectedTool" />
+                        <Binding Path="InkColor" />
+                        <Binding Path="InkTip" />
+                        <Binding Path="HighlighterColor" />
+                        <Binding Path="HighlighterTip" />
+                    </MultiBinding>
+                </InkCanvas.DefaultDrawingAttributes>
+            </InkCanvas>
+        </DockPanel>
+        <Grid Visibility="Collapsed">
+            <Grid.Style>
+                <Style>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding ShowUploadConfirmation}" Value="True">
+                            <DataTrigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.2" />
+                                        <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="Visibility">
+                                            <DiscreteObjectKeyFrame Value="{x:Static Visibility.Visible}" KeyTime="0:0:0" />
+                                        </ObjectAnimationUsingKeyFrames>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </DataTrigger.EnterActions>
+                            <DataTrigger.ExitActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetProperty="Opacity" From="1" To="0" Duration="0:0:0.2" />
+                                        <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="Visibility">
+                                            <DiscreteObjectKeyFrame Value="{x:Static Visibility.Collapsed}" KeyTime="0:0:0.2" />
+                                        </ObjectAnimationUsingKeyFrames>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </DataTrigger.ExitActions>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Grid.Style>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Button Grid.Row="0" Grid.RowSpan="3" Grid.Column="0" Grid.ColumnSpan="3" Style="{StaticResource DismissDialog}" Command="{Binding CancelUploadCommand}" />
+            <Grid Grid.Row="1" Grid.Column="1">
+                <Grid.Style>
+                    <Style>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding ShowUploadConfirmation}" Value="True">
+                                <DataTrigger.EnterActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetProperty="RenderTransform.X" From="-50" To="0" Duration="0:0:0.2">
+                                                <DoubleAnimation.EasingFunction>
+                                                    <ExponentialEase EasingMode="EaseOut" />
+                                                </DoubleAnimation.EasingFunction>
+                                            </DoubleAnimation>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </DataTrigger.EnterActions>
+                                <DataTrigger.ExitActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetProperty="RenderTransform.X" From="0" To="50" Duration="0:0:0.2">
+                                                <DoubleAnimation.EasingFunction>
+                                                    <ExponentialEase EasingMode="EaseIn" />
+                                                </DoubleAnimation.EasingFunction>
+                                            </DoubleAnimation>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </DataTrigger.ExitActions>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Grid.Style>
+                <Grid.RenderTransform>
+                    <TranslateTransform />
+                </Grid.RenderTransform>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <Border Grid.Row="0" Grid.RowSpan="2" Grid.Column="0" Grid.ColumnSpan="3" Background="SlateGray">
+                    <Border.BitmapEffect>
+                        <DropShadowBitmapEffect Color="#80000000" ShadowDepth="1" />
+                    </Border.BitmapEffect>
+                </Border>
+                <Label Grid.Row="0" Grid.Column="0" Foreground="White" FontFamily="Segoe UI" FontSize="16" VerticalContentAlignment="Center" Margin="4">Upload Doodl</Label>
+                <Button Grid.Row="0" Grid.Column="2" Style="{StaticResource MenuButton}" Command="{Binding CancelUploadCommand}" Content="{StaticResource appbar.close}" />
+                <Grid Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Label Grid.Row="0" Grid.Column="0" Foreground="White" FontFamily="Segoe UI" Margin="16 8 0 8">Upload As:</Label>
+                    <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding DoodlName}" Margin="0 8 16 8" VerticalAlignment="Center" />
+                    <CheckBox Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Foreground="White" IsChecked="{Binding OpenDoodlOnUpload}" Margin="16 8 16 8">Open doodl page when the upload is complete?</CheckBox>
+                    <CheckBox Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Foreground="White" IsChecked="{Binding CopyDoodlUrl}" Margin="16 8 16 8">Copy doodl page URL to clipboard?</CheckBox>
+                    <Border Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Right" BorderBrush="White" BorderThickness="1" Margin="8">
+                        <Button Style="{StaticResource TextButton}" Command="{Binding FinishUploadCommand}" CommandParameter="{x:Reference InkCanvas}">
+                            <TextBlock Margin="4">Upload</TextBlock>
+                        </Button>
+                    </Border>
+                </Grid>
+            </Grid>
+        </Grid>
+        <Grid Visibility="Collapsed">
+            <Grid.Style>
+                <Style>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding ShowUploadProgress}" Value="True">
+                            <DataTrigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.2" />
+                                        <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="Visibility">
+                                            <DiscreteObjectKeyFrame Value="{x:Static Visibility.Visible}" KeyTime="0:0:0" />
+                                        </ObjectAnimationUsingKeyFrames>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </DataTrigger.EnterActions>
+                            <DataTrigger.ExitActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetProperty="Opacity" From="1" To="0" Duration="0:0:0.2" />
+                                        <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="Visibility">
+                                            <DiscreteObjectKeyFrame Value="{x:Static Visibility.Collapsed}" KeyTime="0:0:0.2" />
+                                        </ObjectAnimationUsingKeyFrames>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </DataTrigger.ExitActions>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Grid.Style>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Border Grid.Row="0" Grid.RowSpan="3" Grid.Column="0" Grid.ColumnSpan="3" Background="#80000000" />
+            <Grid Grid.Row="1" Grid.Column="1">
+                <Grid.Style>
+                    <Style>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding ShowUploadProgress}" Value="True">
+                                <DataTrigger.EnterActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetProperty="RenderTransform.X" From="-50" To="0" Duration="0:0:0.2">
+                                                <DoubleAnimation.EasingFunction>
+                                                    <ExponentialEase EasingMode="EaseOut" />
+                                                </DoubleAnimation.EasingFunction>
+                                            </DoubleAnimation>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </DataTrigger.EnterActions>
+                                <DataTrigger.ExitActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetProperty="RenderTransform.X" From="0" To="50" Duration="0:0:0.2">
+                                                <DoubleAnimation.EasingFunction>
+                                                    <ExponentialEase EasingMode="EaseIn" />
+                                                </DoubleAnimation.EasingFunction>
+                                            </DoubleAnimation>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </DataTrigger.ExitActions>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Grid.Style>
+                <Grid.RenderTransform>
+                    <TranslateTransform />
+                </Grid.RenderTransform>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Border Grid.Row="0" Grid.RowSpan="2" Grid.Column="0" Grid.ColumnSpan="2" Background="SlateGray">
+                    <Border.BitmapEffect>
+                        <DropShadowBitmapEffect Color="#80000000" ShadowDepth="1" />
+                    </Border.BitmapEffect>
+                </Border>
+                <Label Grid.Row="0" Grid.Column="0" Foreground="White" FontFamily="Segoe UI" FontSize="16" VerticalContentAlignment="Center" Margin="4">Uploading...</Label>
+            </Grid>
+        </Grid>
+    </Grid>
+    <x:Code>
+        <![CDATA[public DoodlWindow() { this.InitializeComponent(); }]]>
+    </x:Code>
+</Window>

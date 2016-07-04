@@ -1,0 +1,18 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="Doodl.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="DoodlName" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Anonymous Doodler</Value>
+    </Setting>
+    <Setting Name="OpenDoodlOnUpload" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="CopyDoodlUrl" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="UploadEndpoint" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">https://doodl.azurewebsites.net/doodl/upload</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>

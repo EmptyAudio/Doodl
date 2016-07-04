@@ -1,0 +1,98 @@
+﻿@model Doodl.Service.ViewModel.DoodlDisplayModel
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Doodl @Model.Doodl.ID.ToString("N") by @Model.Doodl.Creator</title>
+    <link rel="image_src" href="@Model.Doodl.DisplayImageLocation" />
+    <meta property="og:title" content="Doodl @Model.Doodl.ID.ToString("N") by @Model.Doodl.Creator" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="@Model.Doodl.Location" />
+    <meta property="og:image" content="@Model.Doodl.DisplayImageLocation" />
+    <meta property="og:description" content="Doodl lets you share quick ink doodles with others" />
+    <meta property="twitter:image" content="@Model.Doodl.DisplayImageLocation" />
+    <style>
+        body {
+            margin: 0px;
+            font-family: Calibri, Candara, Segoe, "Segoe UI", Optima, Arial, sans-serif;
+            font-size: 14px;
+            font-style: normal;
+            font-variant: normal;
+            font-weight: 500;
+            line-height: 15.4px;
+        }
+        h1 {
+            margin: 0px;
+            padding: 2pt;
+            background: black;
+            color: #fff;
+            font-family: "Segoe UI", Frutiger, "Frutiger Linotype", "Dejavu Sans", "Helvetica Neue", Arial, sans-serif;
+            font-size: 24px;
+            font-style: normal;
+            font-variant: normal;
+            font-weight: 500;
+            line-height: 26.4px;
+        }
+        figure {
+            border: solid 1px #404040;
+            padding: 4px;
+            text-align: center;
+        }
+        figure img {
+            display: block;
+            margin: 0 auto;
+        }
+        .content {
+            margin: 4pt;
+        }
+        .doodl {
+            display: flex;
+        }
+        .edits {
+            display: flex;
+            flex-wrap: wrap;
+        }
+        .watermark {
+            position: fixed;
+            bottom: 0;
+            right: 0;
+            width: 500px;
+            height: 500px;
+            opacity: 0.2;
+        }
+    </style>
+</head>
+<body>
+    <h1>Doodl</h1>
+    <div class="content">
+        <img class="watermark" src="https://doodl.azurewebsites.net/doodl/prinny">
+        <div class="doodl">
+            <figure>
+                <img src="@Model.Doodl.DisplayImageLocation">
+                @if (Model.Original == null)
+                {
+                    <figcaption>Doodl'd by <strong>@Model.Doodl.Creator</strong> on @Model.Doodl.Timestamp.ToString("MMM d, yyyy")</figcaption>
+                }
+                else
+                {
+                    <figcaption>Edited by <strong>@Model.Doodl.Creator</strong> on @Model.Doodl.Timestamp.ToString("MMM d, yyyy") (<a href="@Model.Original.Location">view original by <strong>@Model.Original.Creator</strong></a>)</figcaption>
+                }
+            </figure>
+        </div>
+        @if (Model.Edits.Count != 0)
+        {
+            <h3>Edits of this Doodl</h3>
+            <div class="edits">
+                @foreach (var doodl in @Model.Edits.OrderBy(d => d.Timestamp))
+                {
+                    <div class="edit">
+                        <figure>
+                            <a href="@doodl.Location"><img src="@doodl.ThumbnailLocation"></a>
+                            <figcaption>@doodl.Creator - @doodl.Timestamp.ToString("MMM d, yyyy")</figcaption>                            
+                        </figure>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+    </body>
+</html>
