@@ -83,7 +83,14 @@
             <Grid.Style>
                 <Style>
                     <Style.Triggers>
-                        <DataTrigger Binding="{Binding ShowUploadConfirmation}" Value="True">
+                        <DataTrigger Value="True">
+                            <DataTrigger.Binding>
+                                <MultiBinding Converter="{StaticResource BooleanOrMultiValueConverter}">
+                                    <Binding Path="ShowUploadConfirmation" />
+                                    <Binding Path="ShowUploadProgress" />
+                                    <Binding Path="ShowUploadError" />
+                                </MultiBinding>
+                            </DataTrigger.Binding>
                             <DataTrigger.EnterActions>
                                 <BeginStoryboard>
                                     <Storyboard>
@@ -118,8 +125,8 @@
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
-            <Button Grid.Row="0" Grid.RowSpan="3" Grid.Column="0" Grid.ColumnSpan="3" Style="{StaticResource DismissDialog}" Command="{Binding CancelUploadCommand}" />
-            <Grid Grid.Row="1" Grid.Column="1">
+            <Button Grid.Row="0" Grid.RowSpan="3" Grid.Column="0" Grid.ColumnSpan="3" Style="{StaticResource DismissDialog}" Command="{Binding DismissDialogCommand}" />
+            <Grid Grid.Row="1" Grid.Column="1" Visibility="Collapsed" HorizontalAlignment="Center" VerticalAlignment="Center">
                 <Grid.Style>
                     <Style>
                         <Style.Triggers>
@@ -127,22 +134,30 @@
                                 <DataTrigger.EnterActions>
                                     <BeginStoryboard>
                                         <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.2" />
                                             <DoubleAnimation Storyboard.TargetProperty="RenderTransform.X" From="-50" To="0" Duration="0:0:0.2">
                                                 <DoubleAnimation.EasingFunction>
                                                     <ExponentialEase EasingMode="EaseOut" />
                                                 </DoubleAnimation.EasingFunction>
                                             </DoubleAnimation>
+                                            <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="Visibility">
+                                                <DiscreteObjectKeyFrame Value="{x:Static Visibility.Visible}" KeyTime="0:0:0" />
+                                            </ObjectAnimationUsingKeyFrames>
                                         </Storyboard>
                                     </BeginStoryboard>
                                 </DataTrigger.EnterActions>
                                 <DataTrigger.ExitActions>
                                     <BeginStoryboard>
                                         <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetProperty="Opacity" From="1" To="0" Duration="0:0:0.2" />
                                             <DoubleAnimation Storyboard.TargetProperty="RenderTransform.X" From="0" To="50" Duration="0:0:0.2">
                                                 <DoubleAnimation.EasingFunction>
                                                     <ExponentialEase EasingMode="EaseIn" />
                                                 </DoubleAnimation.EasingFunction>
                                             </DoubleAnimation>
+                                            <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="Visibility">
+                                                <DiscreteObjectKeyFrame Value="{x:Static Visibility.Collapsed}" KeyTime="0:0:0.2" />
+                                            </ObjectAnimationUsingKeyFrames>
                                         </Storyboard>
                                     </BeginStoryboard>
                                 </DataTrigger.ExitActions>
@@ -167,8 +182,29 @@
                         <DropShadowBitmapEffect Color="#80000000" ShadowDepth="1" />
                     </Border.BitmapEffect>
                 </Border>
-                <Label Grid.Row="0" Grid.Column="0" Foreground="White" FontFamily="Segoe UI" FontSize="16" VerticalContentAlignment="Center" Margin="4">Upload Doodl</Label>
-                <Button Grid.Row="0" Grid.Column="2" Style="{StaticResource MenuButton}" Command="{Binding CancelUploadCommand}" Content="{StaticResource appbar.close}" />
+                <Label Grid.Row="0" Grid.Column="0" Foreground="White" FontFamily="Segoe UI" FontSize="16" VerticalContentAlignment="Center" Margin="4">
+                    <Label.Style>
+                        <Style TargetType="Label">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsEdit}" Value="False">
+                                    <Setter Property="Content">
+                                        <Setter.Value>
+                                            <TextBlock>Upload Doodl</TextBlock>
+                                        </Setter.Value>
+                                    </Setter>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding IsEdit}" Value="True">
+                                    <Setter Property="Content">
+                                        <Setter.Value>
+                                            <TextBlock>Upload Edit</TextBlock>
+                                        </Setter.Value>
+                                    </Setter>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Label.Style>
+                </Label>
+                <Button Grid.Row="0" Grid.Column="2" Style="{StaticResource MenuButton}" Command="{Binding DismissDialogCommand}" Content="{StaticResource appbar.close}" />
                 <Grid Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -191,48 +227,7 @@
                     </Border>
                 </Grid>
             </Grid>
-        </Grid>
-        <Grid Visibility="Collapsed">
-            <Grid.Style>
-                <Style>
-                    <Style.Triggers>
-                        <DataTrigger Binding="{Binding ShowUploadProgress}" Value="True">
-                            <DataTrigger.EnterActions>
-                                <BeginStoryboard>
-                                    <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.2" />
-                                        <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="Visibility">
-                                            <DiscreteObjectKeyFrame Value="{x:Static Visibility.Visible}" KeyTime="0:0:0" />
-                                        </ObjectAnimationUsingKeyFrames>
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </DataTrigger.EnterActions>
-                            <DataTrigger.ExitActions>
-                                <BeginStoryboard>
-                                    <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetProperty="Opacity" From="1" To="0" Duration="0:0:0.2" />
-                                        <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="Visibility">
-                                            <DiscreteObjectKeyFrame Value="{x:Static Visibility.Collapsed}" KeyTime="0:0:0.2" />
-                                        </ObjectAnimationUsingKeyFrames>
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </DataTrigger.ExitActions>
-                        </DataTrigger>
-                    </Style.Triggers>
-                </Style>
-            </Grid.Style>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="*" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="*" />
-            </Grid.RowDefinitions>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
-            <Border Grid.Row="0" Grid.RowSpan="3" Grid.Column="0" Grid.ColumnSpan="3" Background="#80000000" />
-            <Grid Grid.Row="1" Grid.Column="1">
+            <Grid Grid.Row="1" Grid.Column="1" Visibility="Collapsed" HorizontalAlignment="Center" VerticalAlignment="Center">
                 <Grid.Style>
                     <Style>
                         <Style.Triggers>
@@ -240,22 +235,30 @@
                                 <DataTrigger.EnterActions>
                                     <BeginStoryboard>
                                         <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.2" />
                                             <DoubleAnimation Storyboard.TargetProperty="RenderTransform.X" From="-50" To="0" Duration="0:0:0.2">
                                                 <DoubleAnimation.EasingFunction>
                                                     <ExponentialEase EasingMode="EaseOut" />
                                                 </DoubleAnimation.EasingFunction>
                                             </DoubleAnimation>
+                                            <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="Visibility">
+                                                <DiscreteObjectKeyFrame Value="{x:Static Visibility.Visible}" KeyTime="0:0:0" />
+                                            </ObjectAnimationUsingKeyFrames>
                                         </Storyboard>
                                     </BeginStoryboard>
                                 </DataTrigger.EnterActions>
                                 <DataTrigger.ExitActions>
                                     <BeginStoryboard>
                                         <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetProperty="Opacity" From="1" To="0" Duration="0:0:0.2" />
                                             <DoubleAnimation Storyboard.TargetProperty="RenderTransform.X" From="0" To="50" Duration="0:0:0.2">
                                                 <DoubleAnimation.EasingFunction>
                                                     <ExponentialEase EasingMode="EaseIn" />
                                                 </DoubleAnimation.EasingFunction>
                                             </DoubleAnimation>
+                                            <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="Visibility">
+                                                <DiscreteObjectKeyFrame Value="{x:Static Visibility.Collapsed}" KeyTime="0:0:0.2" />
+                                            </ObjectAnimationUsingKeyFrames>
                                         </Storyboard>
                                     </BeginStoryboard>
                                 </DataTrigger.ExitActions>
@@ -280,6 +283,75 @@
                     </Border.BitmapEffect>
                 </Border>
                 <Label Grid.Row="0" Grid.Column="0" Foreground="White" FontFamily="Segoe UI" FontSize="16" VerticalContentAlignment="Center" Margin="4">Uploading...</Label>
+            </Grid>
+            <Grid Grid.Row="1" Grid.Column="1" Visibility="Collapsed" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <Grid.Style>
+                    <Style>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding ShowUploadError}" Value="True">
+                                <DataTrigger.EnterActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.2" />
+                                            <DoubleAnimation Storyboard.TargetProperty="RenderTransform.X" From="-50" To="0" Duration="0:0:0.2">
+                                                <DoubleAnimation.EasingFunction>
+                                                    <ExponentialEase EasingMode="EaseOut" />
+                                                </DoubleAnimation.EasingFunction>
+                                            </DoubleAnimation>
+                                            <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="Visibility">
+                                                <DiscreteObjectKeyFrame Value="{x:Static Visibility.Visible}" KeyTime="0:0:0" />
+                                            </ObjectAnimationUsingKeyFrames>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </DataTrigger.EnterActions>
+                                <DataTrigger.ExitActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetProperty="Opacity" From="1" To="0" Duration="0:0:0.2" />
+                                            <DoubleAnimation Storyboard.TargetProperty="RenderTransform.X" From="0" To="50" Duration="0:0:0.2">
+                                                <DoubleAnimation.EasingFunction>
+                                                    <ExponentialEase EasingMode="EaseIn" />
+                                                </DoubleAnimation.EasingFunction>
+                                            </DoubleAnimation>
+                                            <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="Visibility">
+                                                <DiscreteObjectKeyFrame Value="{x:Static Visibility.Collapsed}" KeyTime="0:0:0.2" />
+                                            </ObjectAnimationUsingKeyFrames>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </DataTrigger.ExitActions>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Grid.Style>
+                <Grid.RenderTransform>
+                    <TranslateTransform />
+                </Grid.RenderTransform>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <Border Grid.Row="0" Grid.RowSpan="2" Grid.Column="0" Grid.ColumnSpan="3" Background="SlateGray">
+                    <Border.BitmapEffect>
+                        <DropShadowBitmapEffect Color="#80000000" ShadowDepth="1" />
+                    </Border.BitmapEffect>
+                </Border>
+                <Label Grid.Row="0" Grid.Column="0" Foreground="White" FontFamily="Segoe UI" FontSize="16" VerticalContentAlignment="Center" Margin="4">Oh No!</Label>
+                <Button Grid.Row="0" Grid.Column="2" Style="{StaticResource MenuButton}" Command="{Binding DismissDialogCommand}" Content="{StaticResource appbar.close}" />
+                <Grid Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <Label Grid.Row="0" Foreground="White" FontFamily="Segoe UI" Margin="16 8 16 8" MaxWidth="350">
+                        <TextBlock TextWrapping="Wrap">Something went wrong uploading your doodl! Here's some nerd-style details of the problem.</TextBlock>
+                    </Label>
+                    <TextBox Grid.Row="1" Text="{Binding UploadError}" Margin="16 0 16 16" VerticalAlignment="Center" TextWrapping="Wrap" IsReadOnly="True" MaxWidth="350" />
+                </Grid>
             </Grid>
         </Grid>
     </Grid>

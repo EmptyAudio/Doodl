@@ -32,23 +32,32 @@ namespace Doodl
             var dialogService = new WindowsDialogService();
             var strokes = new StrokeCollection();
             var undoManager = new StrokeUndoManager(strokes);
-            var uploadService = new AzureUploadService();
-            var viewModel = new DoodlWindowModel(undoManager, dialogService, uploadService);
+            var doodlService = new AzureDoodlService();
+            var viewModel = new DoodlWindowModel(undoManager, dialogService, doodlService);
 
             viewModel.Strokes = strokes;
 
             if (e.Args.Length != 0)
             {
-                Guid guid;
-
-                if (Guid.TryParse(e.Args[0], out guid))
+                if (e.Args[0].StartsWith("doodl:edit:"))
                 {
+                    Guid id;
+
+                    if (Guid.TryParseExact(e.Args[0].Substring(11), "D", out id))
+                    {
+                        using (var stream = doodlService.GetStrokesFor(id).Result)
+                        {
+                            strokes.Add(new StrokeCollection(stream));
+                        }
+
+                        viewModel.EditID = id;
+                    }
                 }
                 else if (File.Exists(e.Args[0]))
                 {
                     using (var stream = File.OpenRead(e.Args[0]))
                     {
-                        viewModel.Strokes = new StrokeCollection(stream);
+                        strokes.Add(new StrokeCollection(stream));
                     }
                 }
             }
@@ -72,6 +81,22 @@ namespace Doodl
             {
                 doodlType.SetValue(null, "EmptyAudio.Doodl");
                 doodlType.SetValue("ContentType", "application/x-ms-ink");
+            }
+
+            using (var doodlProtocol = Registry.CurrentUser.CreateSubKey(@"SOFTWARE\Classes\doodl"))
+            {
+                doodlProtocol.SetValue(null, "Doodl Edit Protocol");
+                doodlProtocol.SetValue("URL Protocol", string.Empty);
+
+                using (var doodlIcon = doodlProtocol.CreateSubKey("DefaultIcon"))
+                {
+                    doodlIcon.SetValue(null, "doodl.exe,1");
+                }
+
+                using (var doodlCommand = doodlProtocol.CreateSubKey(@"shell\open\command"))
+                {
+                    doodlCommand.SetValue(null, "Doodl.exe \"%1\"");
+                }
             }
 
             using (var progid = Registry.CurrentUser.CreateSubKey(@"SOFTWARE\Classes\EmptyAudio.Doodl"))

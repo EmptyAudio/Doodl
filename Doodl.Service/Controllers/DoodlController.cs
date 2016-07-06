@@ -115,6 +115,29 @@ namespace Doodl.Service.Controllers
         }
 
         /// <summary>
+        /// Retrieves information about a doodl.
+        /// </summary>
+        /// <param name="id">The ID of the doodl to retrieve.</param>
+        /// <param name="cancellationToken">The cancellation token to use.</param>
+        /// <returns>The action result.</returns>
+        [HttpGet]
+        public async Task<IActionResult> GetDoodl(Guid id, CancellationToken cancellationToken)
+        {
+            var doodl = await this.doodlStorage.GetDoodlAsync(id, cancellationToken);
+
+            if (doodl != null)
+            {
+                doodl.PartitionKey = null;
+                doodl.RowKey = null;
+                doodl.ETag = null;
+
+                return this.Json(doodl);
+            }
+
+            return this.BadRequest();
+        }
+
+        /// <summary>
         /// Retrieves a random prinny watermark.
         /// </summary>
         /// <returns>A redirect to a random prinny.</returns>

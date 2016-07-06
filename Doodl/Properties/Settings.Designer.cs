@@ -67,5 +67,23 @@ namespace Doodl.Properties {
                 return ((string)(this["UploadEndpoint"]));
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("https://doodl.azurewebsites.net/doodl/uploadedit")]
+        public string UploadEditEndpoint {
+            get {
+                return ((string)(this["UploadEditEndpoint"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("https://doodl.azurewebsites.net/doodl/{0}")]
+        public string GetDoodlEndpointFormat {
+            get {
+                return ((string)(this["GetDoodlEndpointFormat"]));
+            }
+        }
     }
 }

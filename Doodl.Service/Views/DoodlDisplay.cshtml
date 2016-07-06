@@ -32,24 +32,27 @@
             font-weight: 500;
             line-height: 26.4px;
         }
-        figure {
+        .image {
             border: solid 1px #404040;
-            padding: 4px;
+            background: white;
             text-align: center;
         }
-        figure img {
+        .image > img {
             display: block;
             margin: 0 auto;
+            padding: 4px;
         }
         .content {
             margin: 4pt;
         }
         .doodl {
             display: flex;
+            position: relative;
         }
         .edits {
             display: flex;
             flex-wrap: wrap;
+            position: relative;
         }
         .watermark {
             position: fixed;
@@ -59,6 +62,20 @@
             height: 500px;
             opacity: 0.2;
         }
+        div.editLink {
+            margin: 8px;
+        }
+        a.editLink {
+            background-color: slategray;
+            color: white;
+            font-weight: bold;
+            text-decoration: none;
+            height: 20px;
+            padding: 4px;
+        }
+        a.editLink img {
+            vertical-align: top;
+        }
     </style>
 </head>
 <body>
@@ -66,17 +83,25 @@
     <div class="content">
         <img class="watermark" src="https://doodl.azurewebsites.net/doodl/prinny">
         <div class="doodl">
-            <figure>
+            <div class="image">
                 <img src="@Model.Doodl.DisplayImageLocation">
-                @if (Model.Original == null)
-                {
-                    <figcaption>Doodl'd by <strong>@Model.Doodl.Creator</strong> on @Model.Doodl.Timestamp.ToString("MMM d, yyyy")</figcaption>
-                }
-                else
-                {
-                    <figcaption>Edited by <strong>@Model.Doodl.Creator</strong> on @Model.Doodl.Timestamp.ToString("MMM d, yyyy") (<a href="@Model.Original.Location">view original by <strong>@Model.Original.Creator</strong></a>)</figcaption>
-                }
-            </figure>
+                <div>
+                    @if (Model.Original == null)
+                    {
+                        <span>Doodl'd by <strong>@Model.Doodl.Creator</strong> on @Model.Doodl.Timestamp.ToString("MMM d, yyyy")</span>
+                    }
+                    else
+                    {
+                        <span>Edited by <strong>@Model.Doodl.Creator</strong> on @Model.Doodl.Timestamp.ToString("MMM d, yyyy") (<a href="@Model.Original.Location">view original by <strong>@Model.Original.Creator</strong></a>)</span>
+                    }
+                </div>
+                <div class="editLink">
+                    <a href="doodl:edit:@Model.Doodl.ID" class="editLink">
+                        <img src="https://doodl.blob.core.windows.net/web/doodl.png" />
+                        Edit this Doodl
+                    </a>
+                </div>
+            </div>
         </div>
         @if (Model.Edits.Count != 0)
         {
@@ -85,10 +110,10 @@
                 @foreach (var doodl in @Model.Edits.OrderBy(d => d.Timestamp))
                 {
                     <div class="edit">
-                        <figure>
+                        <div class="image">
                             <a href="@doodl.Location"><img src="@doodl.ThumbnailLocation"></a>
-                            <figcaption>@doodl.Creator - @doodl.Timestamp.ToString("MMM d, yyyy")</figcaption>                            
-                        </figure>
+                            <span>@doodl.Creator - @doodl.Timestamp.ToString("MMM d, yyyy")</span>                            
+                        </div>
                     </div>
                 }
             </div>

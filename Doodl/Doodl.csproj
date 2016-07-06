@@ -63,13 +63,14 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Converters\BooleanOrMultiValueConverter.cs" />
     <Compile Include="Converters\DrawingAttributesMultiValueConverter.cs" />
     <Compile Include="Converters\EnumSelectedConverter.cs" />
     <Compile Include="Converters\EnumSelectedVisibilityConverter.cs" />
-    <Compile Include="Model\AzureUploadService.cs" />
+    <Compile Include="Model\AzureDoodlService.cs" />
     <Compile Include="Model\IDialogService.cs" />
     <Compile Include="Model\IUndoManager.cs" />
-    <Compile Include="Model\IUploadService.cs" />
+    <Compile Include="Model\IDoodlService.cs" />
     <Compile Include="Model\StrokeUndoManager.cs" />
     <Compile Include="Model\WindowsDialogService.cs" />
     <Compile Include="ViewModel\CanvasTool.cs" />

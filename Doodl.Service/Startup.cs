@@ -82,6 +82,11 @@ namespace Doodl.Service
                 routes.MapRoute(
                     name: "default",
                     template: "{controller}/{action}");
+
+                routes.MapRoute(
+                    name: "get doodl",
+                    template: "doodl/{id:guid}",
+                    defaults: new { controller = "doodl", action = "GetDoodl" });
             });
         }
     }

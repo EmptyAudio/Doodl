@@ -14,5 +14,11 @@
     <Setting Name="UploadEndpoint" Type="System.String" Scope="Application">
       <Value Profile="(Default)">https://doodl.azurewebsites.net/doodl/upload</Value>
     </Setting>
+    <Setting Name="UploadEditEndpoint" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">https://doodl.azurewebsites.net/doodl/uploadedit</Value>
+    </Setting>
+    <Setting Name="GetDoodlEndpointFormat" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">https://doodl.azurewebsites.net/doodl/{0}</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

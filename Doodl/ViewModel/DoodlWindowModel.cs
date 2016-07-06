@@ -25,11 +25,14 @@ namespace Doodl.ViewModel
     public class DoodlWindowModel : INotifyPropertyChanged
     {
         private readonly IDialogService dialogService;
-        private readonly IUploadService uploadService;
+        private readonly IDoodlService doodlService;
 
         private StrokeCollection strokes;
+        private Guid editID;
         private bool showUploadConfirmation;
         private bool showUploadProgress;
+        private bool showUploadError;
+        private string uploadError;
         private CanvasTool selectedTool = CanvasTool.Ink;
         private Color inkColor;
         private Color highlighterColor;
@@ -42,12 +45,12 @@ namespace Doodl.ViewModel
         /// </summary>
         /// <param name="undoManager">The undo manager to use.</param>
         /// <param name="dialogService">The dialog service to use.</param>
-        /// <param name="uploadService">The upload service to use.</param>
-        public DoodlWindowModel(IUndoManager undoManager, IDialogService dialogService, IUploadService uploadService)
+        /// <param name="doodlService">The upload service to use.</param>
+        public DoodlWindowModel(IUndoManager undoManager, IDialogService dialogService, IDoodlService doodlService)
         {
             this.UndoManager = undoManager;
             this.dialogService = dialogService;
-            this.uploadService = uploadService;
+            this.doodlService = doodlService;
 
             this.InkPenTips = (PenTipCollection)Application.Current.TryFindResource("DefaultInkPenTips") ?? new PenTipCollection();
             this.HighlighterPenTips = (PenTipCollection)Application.Current.TryFindResource("DefaultHighlighterPenTips") ?? new PenTipCollection();
@@ -72,9 +75,8 @@ namespace Doodl.ViewModel
             this.SaveAsImageCommand = new DelegateCommand("Save as Image", this.SaveAsImage);
 
             this.StartUploadCommand = new DelegateCommand("Upload", _ => { this.ShowUploadConfirmation = true; });
-            this.CancelUploadCommand = new DelegateCommand("Cancel", _ => { this.ShowUploadConfirmation = false; });
-
             this.FinishUploadCommand = new DelegateCommand("Upload", this.Upload);
+            this.DismissDialogCommand = new DelegateCommand("Cancel", _ => { this.ShowUploadConfirmation = this.ShowUploadError = false; });
 
             this.UndoManager.UndoStateChanged += (sender, e) =>
             {
@@ -87,6 +89,36 @@ namespace Doodl.ViewModel
         /// Raised when a property is changed.
         /// </summary>
         public event PropertyChangedEventHandler PropertyChanged;
+
+        /// <summary>
+        /// Gets or sets the ID of the doodl of which this is an edit.
+        /// </summary>
+        public Guid EditID
+        {
+            get
+            {
+                return this.editID;
+            }
+
+            set
+            {
+                this.editID = value;
+
+                this.OnPropertyChanged();
+                this.OnPropertyChanged("IsEdit");
+            }
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether or not this doodl is an edit.
+        /// </summary>
+        public bool IsEdit
+        {
+            get
+            {
+                return this.EditID != Guid.Empty;
+            }
+        }
 
         /// <summary>
         /// Gets the undo manager for this view model.
@@ -129,14 +161,14 @@ namespace Doodl.ViewModel
         public DelegateCommand StartUploadCommand { get; }
 
         /// <summary>
-        /// Gets the save command.
-        /// </summary>
-        public DelegateCommand CancelUploadCommand { get; }
-
-        /// <summary>
         /// Gets the finish upload command.
         /// </summary>
         public DelegateCommand FinishUploadCommand { get; }
+
+        /// <summary>
+        /// Gets the dismiss dialog command.
+        /// </summary>
+        public DelegateCommand DismissDialogCommand { get; }
 
         /// <summary>
         /// Gets or sets the name to use when uploading doodls.
@@ -247,6 +279,42 @@ namespace Doodl.ViewModel
             set
             {
                 this.showUploadProgress = value;
+
+                this.OnPropertyChanged();
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the upload error screen should be shown.
+        /// </summary>
+        public bool ShowUploadError
+        {
+            get
+            {
+                return this.showUploadError;
+            }
+
+            set
+            {
+                this.showUploadError = value;
+
+                this.OnPropertyChanged();
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the upload error message.
+        /// </summary>
+        public string UploadError
+        {
+            get
+            {
+                return this.uploadError;
+            }
+
+            set
+            {
+                this.uploadError = value;
 
                 this.OnPropertyChanged();
             }
@@ -434,6 +502,8 @@ namespace Doodl.ViewModel
                     this.Strokes.Add(new StrokeCollection(stream));
 
                     this.UndoManager.Clear();
+
+                    this.EditID = Guid.Empty;
                 }
             }
         }
@@ -462,8 +532,8 @@ namespace Doodl.ViewModel
 
         private async void Upload(object parameter)
         {
-            this.ShowUploadConfirmation = false;
             this.ShowUploadProgress = true;
+            this.ShowUploadConfirmation = false;
 
             try
             {
@@ -478,7 +548,16 @@ namespace Doodl.ViewModel
 
                 inkStream.Position = 0;
 
-                var url = await this.uploadService.Upload(this.DoodlName, imageStream, thumbnailStream, inkStream);
+                string url;
+
+                if (this.IsEdit)
+                {
+                    url = await this.doodlService.UploadEdit(this.EditID, this.DoodlName, imageStream, thumbnailStream, inkStream);
+                }
+                else
+                {
+                    url = await this.doodlService.Upload(this.DoodlName, imageStream, thumbnailStream, inkStream);
+                }
 
                 if (this.CopyDoodlUrl)
                 {
@@ -489,6 +568,11 @@ namespace Doodl.ViewModel
                 {
                     Process.Start(url);
                 }
+            }
+            catch (Exception ex)
+            {
+                this.UploadError = ex.ToString();
+                this.ShowUploadError = true;
             }
             finally
             {

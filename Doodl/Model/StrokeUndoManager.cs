@@ -150,12 +150,15 @@ namespace Doodl.Model
 
         private void AddInProgressToUndo()
         {
-            this.redoStack.Clear();
-            this.undoStack.Push(new UndoOperation(this.inProgress));
+            if (this.inProgress.Count > 0)
+            {
+                this.redoStack.Clear();
+                this.undoStack.Push(new UndoOperation(this.inProgress));
 
-            this.inProgress.Clear();
+                this.inProgress.Clear();
 
-            this.OnUndoStateChanged();
+                this.OnUndoStateChanged();
+            }
         }
 
         private class UndoOperation
